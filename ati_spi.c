@@ -41,6 +41,7 @@ enum ati_spi_type {
 	ATI_SPI_TYPE_R600 = 1,
 	ATI_SPI_TYPE_RV730,
 	ATI_SPI_TYPE_EVERGREEN,
+	ATI_SPI_TYPE_NORTHERN_ISLAND,
 };
 
 struct ati_spi_pci_private;
@@ -204,6 +205,16 @@ static int r600_spi_enable(struct ati_spi_data *device)
 		/* software enable clock gating and set sck divider to 1 */
 		mmio_mask(R600_ROM_CNTL, 0x10000002, 0xF0000002);
 
+	if (private->type == ATI_SPI_TYPE_NORTHERN_ISLAND) {
+		/*
+		 * Probably some other gpio lines...
+		 * These are not restored by ATIs own tool.
+		 */
+		mmio_mask(0x64A0, 0x100, 0x100);
+		mmio_mask(0x64A8, 0x100, 0x100);
+		mmio_mask(0x64A4, 0x100, 0x100);
+	}
+
 	/* set gpio7,8,9 low */
 	mmio_mask(R600_GPIOPAD_A, 0, 0x0700);
 	/* gpio7 is input, gpio8/9 are output */
@@ -219,7 +230,8 @@ static int r600_spi_enable(struct ati_spi_data *device)
 	mmio_mask(R600_MEDIUM_VID_LOWER_GPIO_CNTL, 0, 0x0400);
 	mmio_mask(R600_LOW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
 
-	if (private->type != ATI_SPI_TYPE_EVERGREEN)
+	if ((private->type == ATI_SPI_TYPE_R600) ||
+	    (private->type == ATI_SPI_TYPE_RV730))
 		mmio_mask(R600_LOWER_GPIO_ENABLE, 0x0400, 0x0400);
 
 	default_delay(1000);
@@ -385,6 +397,18 @@ static const struct ati_spi_pci_private evergreen_spi_pci_private = {
 	.master = &r600_spi_master,
 };
 
+/*
+ * Used by Cayman, Barts, Turks, and Caicos.
+ */
+static const struct ati_spi_pci_private northern_island_spi_pci_private = {
+	.io_bar = PCI_BASE_ADDRESS_2,
+	.type = ATI_SPI_TYPE_NORTHERN_ISLAND,
+	.save = r600_spi_save,
+	.restore = r600_spi_restore,
+	.enable = r600_spi_enable,
+	.master = &r600_spi_master,
+};
+
 struct ati_spi_pci_match {
 	uint16_t vendor_id;
 	uint16_t device_id;
@@ -392,6 +416,44 @@ struct ati_spi_pci_match {
 };
 
 const struct ati_spi_pci_match ati_spi_pci_devices[] = {
+	{0x1002, 0x6704, &northern_island_spi_pci_private},
+	{0x1002, 0x6707, &northern_island_spi_pci_private},
+	{0x1002, 0x6718, &northern_island_spi_pci_private},
+	{0x1002, 0x6719, &northern_island_spi_pci_private},
+	{0x1002, 0x671C, &northern_island_spi_pci_private},
+	{0x1002, 0x671D, &northern_island_spi_pci_private},
+	{0x1002, 0x671F, &northern_island_spi_pci_private},
+	{0x1002, 0x6720, &northern_island_spi_pci_private},
+	{0x1002, 0x6738, &northern_island_spi_pci_private},
+	{0x1002, 0x6739, &northern_island_spi_pci_private},
+	{0x1002, 0x673E, &northern_island_spi_pci_private},
+	{0x1002, 0x6740, &northern_island_spi_pci_private},
+	{0x1002, 0x6741, &northern_island_spi_pci_private},
+	{0x1002, 0x6742, &northern_island_spi_pci_private},
+	{0x1002, 0x6743, &northern_island_spi_pci_private},
+	{0x1002, 0x6749, &northern_island_spi_pci_private},
+	{0x1002, 0x674A, &northern_island_spi_pci_private},
+	{0x1002, 0x6750, &northern_island_spi_pci_private},
+	{0x1002, 0x6751, &northern_island_spi_pci_private},
+	{0x1002, 0x6758, &northern_island_spi_pci_private},
+	{0x1002, 0x6759, &northern_island_spi_pci_private},
+	{0x1002, 0x675b, &northern_island_spi_pci_private},
+	{0x1002, 0x675d, &northern_island_spi_pci_private},
+	{0x1002, 0x675f, &northern_island_spi_pci_private},
+	{0x1002, 0x6760, &northern_island_spi_pci_private},
+	{0x1002, 0x6761, &northern_island_spi_pci_private},
+	{0x1002, 0x6763, &northern_island_spi_pci_private},
+	{0x1002, 0x6764, &northern_island_spi_pci_private},
+	{0x1002, 0x6765, &northern_island_spi_pci_private},
+	{0x1002, 0x6766, &northern_island_spi_pci_private},
+	{0x1002, 0x6767, &northern_island_spi_pci_private},
+	{0x1002, 0x6768, &northern_island_spi_pci_private},
+	{0x1002, 0x6770, &northern_island_spi_pci_private},
+	{0x1002, 0x6771, &northern_island_spi_pci_private},
+	{0x1002, 0x6772, &northern_island_spi_pci_private},
+	{0x1002, 0x6778, &northern_island_spi_pci_private},
+	{0x1002, 0x6779, &northern_island_spi_pci_private},
+	{0x1002, 0x677B, &northern_island_spi_pci_private},
 	{0x1002, 0x6880, &evergreen_spi_pci_private},
 	{0x1002, 0x6888, &evergreen_spi_pci_private},
 	{0x1002, 0x6889, &evergreen_spi_pci_private},
@@ -536,6 +598,44 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 };
 
 static const struct dev_entry devs_ati_spi[] = {
+	{0x1002, 0x6704, NT, "AMD", "Cayman PRO GL [FirePro V7900]" },
+	{0x1002, 0x6707, NT, "AMD", "Cayman LE GL [FirePro V5900]" },
+	{0x1002, 0x6718, NT, "AMD", "Cayman XT [Radeon HD 6970]" },
+	{0x1002, 0x6719, NT, "AMD", "Cayman PRO [Radeon HD 6950]" },
+	{0x1002, 0x671C, NT, "AMD", "Antilles [Radeon HD 6990]" },
+	{0x1002, 0x671D, NT, "AMD", "Antilles [Radeon HD 6990]" },
+	{0x1002, 0x671F, NT, "AMD", "Cayman CE [Radeon HD 6930]" },
+	{0x1002, 0x6720, NT, "AMD", "Blackcomb [Radeon HD 6970M/6990M]" },
+	{0x1002, 0x6738, NT, "AMD", "Barts XT [Radeon HD 6870]" },
+	{0x1002, 0x6739, NT, "AMD", "Barts PRO [Radeon HD 6850]" },
+	{0x1002, 0x673E, NT, "AMD", "Barts LE [Radeon HD 6790]" },
+	{0x1002, 0x6740, NT, "AMD", "Whistler [Radeon HD 6730M/6770M/7690M XT]" },
+	{0x1002, 0x6741, NT, "AMD", "Whistler [Radeon HD 6630M/6650M/6750M/7670M/7690M]" },
+	{0x1002, 0x6742, NT, "AMD", "Whistler LE [Radeon HD 6610M/7610M]" },
+	{0x1002, 0x6743, NT, "AMD", "Whistler [Radeon E6760]" },
+	{0x1002, 0x6749, NT, "AMD", "Turks GL [FirePro V4900]" },
+	{0x1002, 0x674A, NT, "AMD", "Turks GL [FirePro V3900]" },
+	{0x1002, 0x6750, NT, "AMD", "Onega [Radeon HD 6650A/7650A]" },
+	{0x1002, 0x6751, NT, "AMD", "Turks [Radeon HD 7650A/7670A]" },
+	{0x1002, 0x6758, NT, "AMD", "Turks XT [Radeon HD 6670/7670]" },
+	{0x1002, 0x6759, NT, "AMD", "Turks PRO [Radeon HD 6570/7570/8550 / R5 230]" },
+	{0x1002, 0x675b, NT, "AMD", "Turks [Radeon HD 7600 Series]" },
+	{0x1002, 0x675d, NT, "AMD", "Turks PRO [Radeon HD 7570]" },
+	{0x1002, 0x675f, NT, "AMD", "Turks LE [Radeon HD 5570/6510/7510/8510]" },
+	{0x1002, 0x6760, NT, "AMD", "Seymour [Radeon HD 6400M/7400M Series]" },
+	{0x1002, 0x6761, NT, "AMD", "Seymour LP [Radeon HD 6430M]" },
+	{0x1002, 0x6763, NT, "AMD", "Seymour [Radeon E6460]" },
+	{0x1002, 0x6764, NT, "AMD", "Seymour [Radeon HD 6400M Series]" },
+	{0x1002, 0x6765, NT, "AMD", "Seymour [Radeon HD 6400M Series]" },
+	{0x1002, 0x6766, NT, "AMD", "Caicos" },
+	{0x1002, 0x6767, NT, "AMD", "Caicos" },
+	{0x1002, 0x6768, NT, "AMD", "Caicos" },
+	{0x1002, 0x6770, NT, "AMD", "Caicos [Radeon HD 6450A/7450A]" },
+	{0x1002, 0x6771, NT, "AMD", "Caicos XTX [Radeon HD 8490 / R5 235X OEM]" },
+	{0x1002, 0x6772, NT, "AMD", "Caicos [Radeon HD 7450A]" },
+	{0x1002, 0x6778, NT, "AMD", "Caicos XT [Radeon HD 7470/8470 / R5 235/310 OEM]" },
+	{0x1002, 0x6779, NT, "AMD", "Caicos [Radeon HD 6450/7450/8450 / R5 230 OEM]" },
+	{0x1002, 0x677B, NT, "AMD", "Caicos PRO [Radeon HD 7450]" },
 	{0x1002, 0x6880, NT, "AMD", "Lexington [Radeon HD 6550M]" },
 	{0x1002, 0x6888, NT, "AMD", "Cypress XT [FirePro V8800]" },
 	{0x1002, 0x6889, NT, "AMD", "Cypress PRO [FirePro V7800]" },
