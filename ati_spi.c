@@ -778,7 +778,7 @@ static const struct ati_spi_pci_private hawaii_spi_pci_private = {
 };
 
 /*
- * Used by Iceland, Tonga, Fiji
+ * Used by Iceland, Tonga, Fiji, Ellesmere/Polaris10
  */
 static const struct ati_spi_pci_private iceland_spi_pci_private = {
 	.io_bar = CI_MMIO_BAR,
@@ -855,6 +855,15 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x67B1, &hawaii_spi_pci_private},
 	{0x1002, 0x67B9, &hawaii_spi_pci_private},
 	{0x1002, 0x67BE, &hawaii_spi_pci_private},
+	{0x1002, 0x67C0, &iceland_spi_pci_private},
+	{0x1002, 0x67C2, &iceland_spi_pci_private},
+	{0x1002, 0x67C4, &iceland_spi_pci_private},
+	{0x1002, 0x67C7, &iceland_spi_pci_private},
+	{0x1002, 0x67CA, &iceland_spi_pci_private},
+	{0x1002, 0x67CC, &iceland_spi_pci_private},
+	{0x1002, 0x67CF, &iceland_spi_pci_private},
+	{0x1002, 0x67D0, &iceland_spi_pci_private},
+	{0x1002, 0x67DF, &iceland_spi_pci_private},
 	{0x1002, 0x6840, &southern_island_spi_pci_private},
 	{0x1002, 0x6841, &southern_island_spi_pci_private},
 	{0x1002, 0x6842, &southern_island_spi_pci_private},
@@ -1072,6 +1081,15 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x67B1, NT, "AMD", "Hawaii PRO [Radeon R9 290/390]" },
 	{0x1002, 0x67B9, NT, "AMD", "Vesuvius [Radeon R9 295X2]" },
 	{0x1002, 0x67BE, NT, "AMD", "Hawaii LE" },
+	{0x1002, 0x67C0, NT, "AMD", "Ellesmere [Radeon Pro WX 7100 Mobile]" },
+	{0x1002, 0x67C2, NT, "AMD", "Ellesmere [Radeon Pro V7300X / V7350x2]" },
+	{0x1002, 0x67C4, NT, "AMD", "Ellesmere [Radeon Pro WX 7100]" },
+	{0x1002, 0x67C7, NT, "AMD", "Ellesmere [Radeon Pro WX 5100]" },
+	{0x1002, 0x67CA, NT, "AMD", "Ellesmere [Polaris10]" },
+	{0x1002, 0x67CC, NT, "AMD", "Ellesmere [Polaris10]" },
+	{0x1002, 0x67CF, NT, "AMD", "Ellesmere [Polaris10]" },
+	{0x1002, 0x67D0, NT, "AMD", "Ellesmere [Radeon Pro V7300X / V7350x2]" },
+	{0x1002, 0x67DF, NT, "AMD", "Ellesmere [Radeon RX 470/480/570/570X/580/580X/590]" },
 	{0x1002, 0x6840, NT, "AMD", "Thames [Radeon HD 7500M/7600M Series]" },
 	{0x1002, 0x6841, NT, "AMD", "Thames [Radeon HD 7550M/7570M/7650M]" },
 	{0x1002, 0x6842, NT, "AMD", "Thames LE [Radeon HD 7000M Series]" },
