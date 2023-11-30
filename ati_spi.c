@@ -25,6 +25,16 @@
 /* improve readability */
 #define mmio_read(reg) pci_mmio_readl(device->bar + (reg))
 #define mmio_write(reg, val) pci_mmio_writel((val), device->bar + (reg))
+#define mmio_mask(reg, val, mask) pci_mmio_maskl((val), (mask), device->bar + (reg))
+static void pci_mmio_maskl(uint32_t value, uint32_t mask, uint8_t *addr)
+{
+	uint32_t temp;
+
+	temp = pci_mmio_readl(addr);
+	temp &= ~mask;
+	temp |= value & mask;
+	pci_mmio_writel(temp, addr);
+}
 
 struct ati_spi_pci_private;
 struct ati_spi_data {
@@ -152,10 +162,41 @@ static int r600_spi_restore(struct ati_spi_data *device)
 	return 0;
 }
 
+/*
+ * Enable SPI Access.
+ */
+static int r600_spi_enable(struct ati_spi_data *device)
+{
+	msg_pdbg("%s();\n", __func__);
+
+	/* software enable clock gating and set sck divider to 1 */
+	mmio_mask(R600_ROM_CNTL, 0x10000002, 0xF0000002);
+
+	/* set gpio7,8,9 low */
+	mmio_mask(R600_GPIOPAD_A, 0, 0x0700);
+	/* gpio7 is input, gpio8/9 are output */
+	mmio_mask(R600_GPIOPAD_EN, 0x0600, 0x0700);
+	/* only allow software control on gpio7,8,9 */
+	mmio_mask(R600_GPIOPAD_MASK, 0x0700, 0x0700);
+
+	/* disable open drain pads */
+	mmio_mask(R600_GENERAL_PWRMGT, 0, 0x0800);
+
+	mmio_mask(R600_CTXSW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+	mmio_mask(R600_HIGH_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+	mmio_mask(R600_MEDIUM_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+	mmio_mask(R600_LOW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+
+	mmio_mask(R600_LOWER_GPIO_ENABLE, 0x0400, 0x0400);
+
+	return 0;
+}
+
 static const struct ati_spi_pci_private r600_spi_pci_private = {
 	.io_bar = PCI_BASE_ADDRESS_2,
 	.save = r600_spi_save,
 	.restore = r600_spi_restore,
+	.enable = r600_spi_enable,
 };
 
 struct ati_spi_pci_match {
