@@ -40,6 +40,7 @@ static void pci_mmio_maskl(uint32_t value, uint32_t mask, uint8_t *addr)
 enum ati_spi_type {
 	ATI_SPI_TYPE_R600 = 1,
 	ATI_SPI_TYPE_RV730,
+	ATI_SPI_TYPE_EVERGREEN,
 };
 
 struct ati_spi_pci_private;
@@ -218,7 +219,8 @@ static int r600_spi_enable(struct ati_spi_data *device)
 	mmio_mask(R600_MEDIUM_VID_LOWER_GPIO_CNTL, 0, 0x0400);
 	mmio_mask(R600_LOW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
 
-	mmio_mask(R600_LOWER_GPIO_ENABLE, 0x0400, 0x0400);
+	if (private->type != ATI_SPI_TYPE_EVERGREEN)
+		mmio_mask(R600_LOWER_GPIO_ENABLE, 0x0400, 0x0400);
 
 	default_delay(1000);
 
@@ -371,6 +373,18 @@ static const struct ati_spi_pci_private rv730_spi_pci_private = {
 	.master = &r600_spi_master,
 };
 
+/*
+ * Used by Cypress, Juniper, Redwood and Cedar.
+ */
+static const struct ati_spi_pci_private evergreen_spi_pci_private = {
+	.io_bar = PCI_BASE_ADDRESS_2,
+	.type = ATI_SPI_TYPE_EVERGREEN,
+	.save = r600_spi_save,
+	.restore = r600_spi_restore,
+	.enable = r600_spi_enable,
+	.master = &r600_spi_master,
+};
+
 struct ati_spi_pci_match {
 	uint16_t vendor_id;
 	uint16_t device_id;
@@ -378,6 +392,48 @@ struct ati_spi_pci_match {
 };
 
 const struct ati_spi_pci_match ati_spi_pci_devices[] = {
+	{0x1002, 0x6880, &evergreen_spi_pci_private},
+	{0x1002, 0x6888, &evergreen_spi_pci_private},
+	{0x1002, 0x6889, &evergreen_spi_pci_private},
+	{0x1002, 0x688A, &evergreen_spi_pci_private},
+	{0x1002, 0x688C, &evergreen_spi_pci_private},
+	{0x1002, 0x688D, &evergreen_spi_pci_private},
+	{0x1002, 0x6898, &evergreen_spi_pci_private},
+	{0x1002, 0x6899, &evergreen_spi_pci_private},
+	{0x1002, 0x689B, &evergreen_spi_pci_private},
+	{0x1002, 0x689C, &evergreen_spi_pci_private},
+	{0x1002, 0x689D, &evergreen_spi_pci_private},
+	{0x1002, 0x689E, &evergreen_spi_pci_private},
+	{0x1002, 0x68A0, &evergreen_spi_pci_private},
+	{0x1002, 0x68A1, &evergreen_spi_pci_private},
+	{0x1002, 0x68A8, &evergreen_spi_pci_private},
+	{0x1002, 0x68A9, &evergreen_spi_pci_private},
+	{0x1002, 0x68B8, &evergreen_spi_pci_private},
+	{0x1002, 0x68B9, &evergreen_spi_pci_private},
+	{0x1002, 0x68BA, &evergreen_spi_pci_private},
+	{0x1002, 0x68BE, &evergreen_spi_pci_private},
+	{0x1002, 0x68BF, &evergreen_spi_pci_private},
+	{0x1002, 0x68C0, &evergreen_spi_pci_private},
+	{0x1002, 0x68C1, &evergreen_spi_pci_private},
+	{0x1002, 0x68C7, &evergreen_spi_pci_private},
+	{0x1002, 0x68C8, &evergreen_spi_pci_private},
+	{0x1002, 0x68C9, &evergreen_spi_pci_private},
+	{0x1002, 0x68D8, &evergreen_spi_pci_private},
+	{0x1002, 0x68D9, &evergreen_spi_pci_private},
+	{0x1002, 0x68DA, &evergreen_spi_pci_private},
+	{0x1002, 0x68DE, &evergreen_spi_pci_private},
+	{0x1002, 0x68E0, &evergreen_spi_pci_private},
+	{0x1002, 0x68E1, &evergreen_spi_pci_private},
+	{0x1002, 0x68E4, &evergreen_spi_pci_private},
+	{0x1002, 0x68E5, &evergreen_spi_pci_private},
+	{0x1002, 0x68E8, &evergreen_spi_pci_private},
+	{0x1002, 0x68E9, &evergreen_spi_pci_private},
+	{0x1002, 0x68F1, &evergreen_spi_pci_private},
+	{0x1002, 0x68F2, &evergreen_spi_pci_private},
+	{0x1002, 0x68F8, &evergreen_spi_pci_private},
+	{0x1002, 0x68F9, &evergreen_spi_pci_private},
+	{0x1002, 0x68FA, &evergreen_spi_pci_private},
+	{0x1002, 0x68FE, &evergreen_spi_pci_private},
 	{0x1002, 0x9400, &r600_spi_pci_private},
 	{0x1002, 0x9401, &r600_spi_pci_private},
 	{0x1002, 0x9402, &r600_spi_pci_private},
@@ -480,6 +536,48 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 };
 
 static const struct dev_entry devs_ati_spi[] = {
+	{0x1002, 0x6880, NT, "AMD", "Lexington [Radeon HD 6550M]" },
+	{0x1002, 0x6888, NT, "AMD", "Cypress XT [FirePro V8800]" },
+	{0x1002, 0x6889, NT, "AMD", "Cypress PRO [FirePro V7800]" },
+	{0x1002, 0x688A, NT, "AMD", "Cypress XT [FirePro V9800]" },
+	{0x1002, 0x688C, NT, "AMD", "Cypress XT GL [FireStream 9370]" },
+	{0x1002, 0x688D, NT, "AMD", "Cypress PRO GL [FireStream 9350]" },
+	{0x1002, 0x6898, NT, "AMD", "Cypress XT [Radeon HD 5870]" },
+	{0x1002, 0x6899, NT, "AMD", "Cypress PRO [Radeon HD 5850]" },
+	{0x1002, 0x689B, NT, "AMD", "Cypress PRO [Radeon HD 6800 Series]" },
+	{0x1002, 0x689C, NT, "AMD", "Hemlock [Radeon HD 5970]" },
+	{0x1002, 0x689D, NT, "AMD", "Hemlock [Radeon HD 5970]" },
+	{0x1002, 0x689E, NT, "AMD", "Cypress LE [Radeon HD 5830]" },
+	{0x1002, 0x68A0, NT, "AMD", "Broadway XT [Mobility Radeon HD 5870]" },
+	{0x1002, 0x68A1, NT, "AMD", "Broadway PRO [Mobility Radeon HD 5850]" },
+	{0x1002, 0x68A8, NT, "AMD", "Granville [Radeon HD 6850M/6870M]" },
+	{0x1002, 0x68A9, NT, "AMD", "Juniper XT [FirePro V5800]" },
+	{0x1002, 0x68B8, NT, "AMD", "Juniper XT [Radeon HD 5770]" },
+	{0x1002, 0x68B9, NT, "AMD", "Juniper LE [Radeon HD 5670 640SP Edition]" },
+	{0x1002, 0x68BA, NT, "AMD", "Juniper XT [Radeon HD 6770]" },
+	{0x1002, 0x68BE, NT, "AMD", "Juniper PRO [Radeon HD 5750]" },
+	{0x1002, 0x68BF, NT, "AMD", "Juniper PRO [Radeon HD 6750]" },
+	{0x1002, 0x68C0, NT, "AMD", "Madison [Mobility Radeon HD 5730 / 6570M]" },
+	{0x1002, 0x68C1, NT, "AMD", "Madison [Mobility Radeon HD 5650/5750 / 6530M/6550M]" },
+	{0x1002, 0x68C7, NT, "AMD", "Pinewood [Mobility Radeon HD 5570/6550A]" },
+	{0x1002, 0x68C8, NT, "AMD", "Redwood XT GL [FirePro V4800]" },
+	{0x1002, 0x68C9, NT, "AMD", "Redwood PRO GL [FirePro V3800]" },
+	{0x1002, 0x68D8, NT, "AMD", "Redwood XT [Radeon HD 5670/5690/5730]" },
+	{0x1002, 0x68D9, NT, "AMD", "Redwood PRO [Radeon HD 5550/5570/5630/6510/6610/7570]" },
+	{0x1002, 0x68DA, NT, "AMD", "Redwood LE [Radeon HD 5550/5570/5630/6390/6490/7570]" },
+	{0x1002, 0x68DE, NT, "AMD", "Redwood" },
+	{0x1002, 0x68E0, NT, "AMD", "Park [Mobility Radeon HD 5430/5450/5470]" },
+	{0x1002, 0x68E1, NT, "AMD", "Park [Mobility Radeon HD 5430]" },
+	{0x1002, 0x68E4, NT, "AMD", "Robson CE [Radeon HD 6370M/7370M]" },
+	{0x1002, 0x68E5, NT, "AMD", "Robson LE [Radeon HD 6330M]" },
+	{0x1002, 0x68E8, NT, "AMD", "Cedar" },
+	{0x1002, 0x68E9, NT, "AMD", "Cedar [ATI FirePro (FireGL) Graphics Adapter]" },
+	{0x1002, 0x68F1, NT, "AMD", "Cedar GL [FirePro 2460]" },
+	{0x1002, 0x68F2, NT, "AMD", "Cedar GL [FirePro 2270]" },
+	{0x1002, 0x68F8, NT, "AMD", "Cedar [Radeon HD 7300 Series]" },
+	{0x1002, 0x68F9, NT, "AMD", "Cedar [Radeon HD 5000/6000/7350/8350 Series]" },
+	{0x1002, 0x68FA, NT, "AMD", "Cedar [Radeon HD 7350/8350 / R5 220]" },
+	{0x1002, 0x68FE, NT, "AMD", "Cedar LE" },
 	{0x1002, 0x9400, NT, "AMD", "R600 [Radeon HD 2900 PRO/XT]" },
 	{0x1002, 0x9401, NT, "AMD", "R600 [Radeon HD 2900 XT]" },
 	{0x1002, 0x9402, NT, "AMD", "R600" },
