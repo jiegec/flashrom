@@ -43,7 +43,8 @@ enum ati_spi_type {
 	ATI_SPI_TYPE_EVERGREEN,
 	ATI_SPI_TYPE_NORTHERN_ISLAND,
 	ATI_SPI_TYPE_SOUTHERN_ISLAND,
-	ATI_SPI_TYPE_BONAIRE,
+	ATI_SPI_TYPE_BONAIRE, /* First of sea island type spi interface */
+	ATI_SPI_TYPE_HAWAII,
 };
 
 struct ati_spi_pci_private;
@@ -761,6 +762,18 @@ static const struct ati_spi_pci_private bonaire_spi_pci_private = {
 	.master = &ci_spi_master,
 };
 
+/*
+ * Used by Hawaii
+ */
+static const struct ati_spi_pci_private hawaii_spi_pci_private = {
+	.io_bar = CI_MMIO_BAR,
+	.type = ATI_SPI_TYPE_HAWAII,
+	.save = ci_spi_save,
+	.restore = ci_spi_restore,
+	.enable = ci_spi_enable,
+	.master = &ci_spi_master,
+};
+
 struct ati_spi_pci_match {
 	uint16_t vendor_id;
 	uint16_t device_id;
@@ -817,6 +830,16 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x6778, &northern_island_spi_pci_private},
 	{0x1002, 0x6779, &northern_island_spi_pci_private},
 	{0x1002, 0x677B, &northern_island_spi_pci_private},
+	{0x1002, 0x67A0, &hawaii_spi_pci_private},
+	{0x1002, 0x67A1, &hawaii_spi_pci_private},
+	{0x1002, 0x67A2, &hawaii_spi_pci_private},
+	{0x1002, 0x67A8, &hawaii_spi_pci_private},
+	{0x1002, 0x67A9, &hawaii_spi_pci_private},
+	{0x1002, 0x67AA, &hawaii_spi_pci_private},
+	{0x1002, 0x67B0, &hawaii_spi_pci_private},
+	{0x1002, 0x67B1, &hawaii_spi_pci_private},
+	{0x1002, 0x67B9, &hawaii_spi_pci_private},
+	{0x1002, 0x67BE, &hawaii_spi_pci_private},
 	{0x1002, 0x6840, &southern_island_spi_pci_private},
 	{0x1002, 0x6841, &southern_island_spi_pci_private},
 	{0x1002, 0x6842, &southern_island_spi_pci_private},
@@ -1014,6 +1037,16 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x6778, NT, "AMD", "Caicos XT [Radeon HD 7470/8470 / R5 235/310 OEM]" },
 	{0x1002, 0x6779, NT, "AMD", "Caicos [Radeon HD 6450/7450/8450 / R5 230 OEM]" },
 	{0x1002, 0x677B, NT, "AMD", "Caicos PRO [Radeon HD 7450]" },
+	{0x1002, 0x67A0, NT, "AMD", "Hawaii XT GL [FirePro W9100]" },
+	{0x1002, 0x67A1, NT, "AMD", "Hawaii PRO GL [FirePro W8100]" },
+	{0x1002, 0x67A2, NT, "AMD", "Hawaii GL" },
+	{0x1002, 0x67A8, NT, "AMD", "Hawaii" },
+	{0x1002, 0x67A9, NT, "AMD", "Hawaii" },
+	{0x1002, 0x67AA, NT, "AMD", "Hawaii" },
+	{0x1002, 0x67B0, NT, "AMD", "Hawaii XT / Grenada XT [Radeon R9 290X/390X]" },
+	{0x1002, 0x67B1, NT, "AMD", "Hawaii PRO [Radeon R9 290/390]" },
+	{0x1002, 0x67B9, NT, "AMD", "Vesuvius [Radeon R9 295X2]" },
+	{0x1002, 0x67BE, NT, "AMD", "Hawaii LE" },
 	{0x1002, 0x6840, NT, "AMD", "Thames [Radeon HD 7500M/7600M Series]" },
 	{0x1002, 0x6841, NT, "AMD", "Thames [Radeon HD 7550M/7570M/7650M]" },
 	{0x1002, 0x6842, NT, "AMD", "Thames LE [Radeon HD 7000M Series]" },
