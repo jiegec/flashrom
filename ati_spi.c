@@ -37,6 +37,11 @@ static void pci_mmio_maskl(uint32_t value, uint32_t mask, uint8_t *addr)
 	pci_mmio_writel(temp, addr);
 }
 
+enum ati_spi_type {
+	ATI_SPI_TYPE_R600 = 1,
+	ATI_SPI_TYPE_RV730,
+};
+
 struct ati_spi_pci_private;
 struct ati_spi_data {
 	struct pci_dev *dev;
@@ -47,6 +52,8 @@ struct ati_spi_data {
 
 struct ati_spi_pci_private {
 	int io_bar;
+
+	enum ati_spi_type type;
 
 	int (*save) (struct ati_spi_data *data);
 	int (*restore) (struct ati_spi_data *data);
@@ -184,12 +191,17 @@ static int r600_spi_restore(struct ati_spi_data *device)
  */
 static int r600_spi_enable(struct ati_spi_data *device)
 {
+	const struct ati_spi_pci_private *private = device->private;
 	int i;
 
 	msg_pdbg("%s();\n", __func__);
 
-	/* software enable clock gating and set sck divider to 1 */
-	mmio_mask(R600_ROM_CNTL, 0x10000002, 0xF0000002);
+	if (private->type == ATI_SPI_TYPE_RV730)
+		/* As below, but also set the (unused?) pcie clk divider */
+		mmio_mask(R600_ROM_CNTL, 0x19000002, 0xFF000002);
+	else
+		/* software enable clock gating and set sck divider to 1 */
+		mmio_mask(R600_ROM_CNTL, 0x10000002, 0xF0000002);
 
 	/* set gpio7,8,9 low */
 	mmio_mask(R600_GPIOPAD_A, 0, 0x0700);
@@ -340,6 +352,19 @@ static struct spi_master r600_spi_master = {
  */
 static const struct ati_spi_pci_private r600_spi_pci_private = {
 	.io_bar = PCI_BASE_ADDRESS_2,
+	.type = ATI_SPI_TYPE_R600,
+	.save = r600_spi_save,
+	.restore = r600_spi_restore,
+	.enable = r600_spi_enable,
+	.master = &r600_spi_master,
+};
+
+/*
+ * Used by RV730/RV740.
+ */
+static const struct ati_spi_pci_private rv730_spi_pci_private = {
+	.io_bar = PCI_BASE_ADDRESS_2,
+	.type = ATI_SPI_TYPE_RV730,
 	.save = r600_spi_save,
 	.restore = r600_spi_restore,
 	.enable = r600_spi_enable,
@@ -378,6 +403,21 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x9460, &r600_spi_pci_private},
 	{0x1002, 0x9462, &r600_spi_pci_private},
 	{0x1002, 0x946A, &r600_spi_pci_private},
+	{0x1002, 0x9480, &rv730_spi_pci_private},
+	{0x1002, 0x9488, &rv730_spi_pci_private},
+	{0x1002, 0x9489, &rv730_spi_pci_private},
+	{0x1002, 0x9490, &rv730_spi_pci_private},
+	{0x1002, 0x9491, &rv730_spi_pci_private},
+	{0x1002, 0x9495, &rv730_spi_pci_private},
+	{0x1002, 0x9498, &rv730_spi_pci_private},
+	{0x1002, 0x949C, &rv730_spi_pci_private},
+	{0x1002, 0x949E, &rv730_spi_pci_private},
+	{0x1002, 0x949F, &rv730_spi_pci_private},
+	{0x1002, 0x94A0, &rv730_spi_pci_private},
+	{0x1002, 0x94A1, &rv730_spi_pci_private},
+	{0x1002, 0x94A3, &rv730_spi_pci_private},
+	{0x1002, 0x94B3, &rv730_spi_pci_private},
+	{0x1002, 0x94B4, &rv730_spi_pci_private},
 	{0x1002, 0x94C1, &r600_spi_pci_private},
 	{0x1002, 0x94C3, &r600_spi_pci_private},
 	{0x1002, 0x94C4, &r600_spi_pci_private},
@@ -465,6 +505,21 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x9460, NT, "AMD", "RV790 [Radeon HD 4890]" },
 	{0x1002, 0x9462, NT, "AMD", "RV790 [Radeon HD 4860]" },
 	{0x1002, 0x946A, NT, "AMD", "RV770 GL [FirePro M7750]" },
+	{0x1002, 0x9480, NT, "AMD", "RV730/M96 [Mobility Radeon HD 4650/5165]" },
+	{0x1002, 0x9488, NT, "AMD", "RV730/M96-XT [Mobility Radeon HD 4670]" },
+	{0x1002, 0x9489, NT, "AMD", "RV730/M96 GL [Mobility FireGL V5725]" },
+	{0x1002, 0x9490, NT, "AMD", "RV730 XT [Radeon HD 4670]" },
+	{0x1002, 0x9491, NT, "AMD", "RV730/M96-CSP [Radeon E4690]" },
+	{0x1002, 0x9495, NT, "AMD", "RV730 [Radeon HD 4600 AGP Series]" },
+	{0x1002, 0x9498, NT, "AMD", "RV730 PRO [Radeon HD 4650]" },
+	{0x1002, 0x949C, NT, "AMD", "RV730 GL [FirePro V7750]" },
+	{0x1002, 0x949E, NT, "AMD", "RV730 GL [FirePro V5700]" },
+	{0x1002, 0x949F, NT, "AMD", "RV730 GL [FirePro V3750]" },
+	{0x1002, 0x94A0, NT, "AMD", "RV740/M97 [Mobility Radeon HD 4830]" },
+	{0x1002, 0x94A1, NT, "AMD", "RV740/M97-XT [Mobility Radeon HD 4860]" },
+	{0x1002, 0x94A3, NT, "AMD", "RV740/M97 GL [FirePro M7740]" },
+	{0x1002, 0x94B3, NT, "AMD", "RV740 PRO [Radeon HD 4770]" },
+	{0x1002, 0x94B4, NT, "AMD", "RV740 PRO [Radeon HD 4750]" },
 	{0x1002, 0x94C1, NT, "AMD", "RV610 [Radeon HD 2400 PRO/XT]" },
 	{0x1002, 0x94C3, OK, "AMD", "RV610 [Radeon HD 2400 PRO]" },
 	{0x1002, 0x94C4, NT, "AMD", "RV610 LE [Radeon HD 2400 PRO AGP]" },
