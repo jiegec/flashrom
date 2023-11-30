@@ -22,20 +22,140 @@
 #include "hwaccess_physmap.h"
 #include "platform/pci.h"
 
+/* improve readability */
+#define mmio_read(reg) pci_mmio_readl(device->bar + (reg))
+#define mmio_write(reg, val) pci_mmio_writel((val), device->bar + (reg))
+
 struct ati_spi_pci_private;
 struct ati_spi_data {
 	struct pci_dev *dev;
 	uint8_t *bar;
 	const struct ati_spi_pci_private *private;
+	void *private_data;
 };
 
 struct ati_spi_pci_private {
 	int io_bar;
+
+	int (*save) (struct ati_spi_data *data);
+	int (*restore) (struct ati_spi_data *data);
+	int (*enable) (struct ati_spi_data *data);
+
+	struct spi_master *master;
 };
 
+#define R600_GENERAL_PWRMGT		0x0618
+
+#define R600_LOWER_GPIO_ENABLE		0x0710
+#define R600_CTXSW_VID_LOWER_GPIO_CNTL	0x0718
+#define R600_HIGH_VID_LOWER_GPIO_CNTL	0x071c
+#define R600_MEDIUM_VID_LOWER_GPIO_CNTL	0x0720
+#define R600_LOW_VID_LOWER_GPIO_CNTL	0x0724
+
+#define R600_ROM_CNTL			0x1600
+
+#define R600_GPIOPAD_MASK		0x1798
+#define R600_GPIOPAD_A			0x179C
+#define R600_GPIOPAD_EN			0x17A0
+
+struct r600_spi_data {
+	uint32_t reg_general_pwrmgt;
+	uint32_t reg_lower_gpio_enable;
+	uint32_t reg_ctxsw_vid_lower_gpio_cntl;
+	uint32_t reg_high_vid_lower_gpio_cntl;
+	uint32_t reg_medium_vid_lower_gpio_cntl;
+	uint32_t reg_low_vid_lower_gpio_cntl;
+
+	uint32_t reg_rom_cntl;
+	uint32_t reg_gpiopad_mask;
+	uint32_t reg_gpiopad_a;
+	uint32_t reg_gpiopad_en;
+};
+
+/*
+ * Save for later restore.
+ */
+static int r600_spi_save(struct ati_spi_data *device)
+{
+	struct r600_spi_data *data;
+
+	msg_pdbg("%s();\n", __func__);
+
+	if (device->private_data) {
+		msg_perr("%s: device->private_data is already assigned.\n",
+			 __func__);
+		return -1;
+	}
+
+	data = calloc(1, sizeof(struct r600_spi_data));
+
+	data->reg_general_pwrmgt = mmio_read(R600_GENERAL_PWRMGT);
+
+	data->reg_lower_gpio_enable = mmio_read(R600_LOWER_GPIO_ENABLE);
+	data->reg_ctxsw_vid_lower_gpio_cntl =
+		mmio_read(R600_CTXSW_VID_LOWER_GPIO_CNTL);
+	data->reg_high_vid_lower_gpio_cntl =
+		mmio_read(R600_HIGH_VID_LOWER_GPIO_CNTL);
+	data->reg_medium_vid_lower_gpio_cntl =
+		mmio_read(R600_MEDIUM_VID_LOWER_GPIO_CNTL);
+	data->reg_low_vid_lower_gpio_cntl =
+		mmio_read(R600_LOW_VID_LOWER_GPIO_CNTL);
+
+	data->reg_rom_cntl = mmio_read(R600_ROM_CNTL);
+
+	data->reg_gpiopad_mask = mmio_read(R600_GPIOPAD_MASK);
+	data->reg_gpiopad_a = mmio_read(R600_GPIOPAD_A);
+	data->reg_gpiopad_en = mmio_read(R600_GPIOPAD_EN);
+
+	device->private_data = data;
+
+	return 0;
+}
+
+/*
+ * Restore saved registers, in the order of enable writes.
+ */
+static int r600_spi_restore(struct ati_spi_data *device)
+{
+	struct r600_spi_data *data = device->private_data;
+
+	msg_pdbg("%s();\n", __func__);
+
+	if (!data) {
+		msg_perr("%s: device->private_data is not assigned.\n",
+			 __func__);
+		return -1;
+	}
+
+	mmio_write(R600_ROM_CNTL, data->reg_rom_cntl);
+
+	mmio_write(R600_GPIOPAD_A, data->reg_gpiopad_a);
+	mmio_write(R600_GPIOPAD_EN, data->reg_gpiopad_en);
+	mmio_write(R600_GPIOPAD_MASK, data->reg_gpiopad_mask);
+
+	mmio_write(R600_GENERAL_PWRMGT, data->reg_general_pwrmgt);
+
+	mmio_write(R600_CTXSW_VID_LOWER_GPIO_CNTL,
+		   data->reg_ctxsw_vid_lower_gpio_cntl);
+	mmio_write(R600_HIGH_VID_LOWER_GPIO_CNTL,
+		   data->reg_high_vid_lower_gpio_cntl);
+	mmio_write(R600_MEDIUM_VID_LOWER_GPIO_CNTL,
+		   data->reg_medium_vid_lower_gpio_cntl);
+	mmio_write(R600_LOW_VID_LOWER_GPIO_CNTL,
+		   data->reg_low_vid_lower_gpio_cntl);
+
+	mmio_write(R600_LOWER_GPIO_ENABLE, data->reg_lower_gpio_enable);
+
+	free(data);
+	device->private_data = NULL;
+
+	return 0;
+}
 
 static const struct ati_spi_pci_private r600_spi_pci_private = {
 	.io_bar = PCI_BASE_ADDRESS_2,
+	.save = r600_spi_save,
+	.restore = r600_spi_restore,
 };
 
 struct ati_spi_pci_match {
@@ -53,6 +173,19 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x958D, NT, "AMD", "RV630 GL [FireGL V3600]" },
 	{},
 };
+
+/*
+ *
+ */
+static int ati_spi_shutdown(void *par_data)
+{
+	struct ati_spi_data *data = par_data;
+
+	data->private->restore(data);
+
+	free(par_data);
+	return 0;
+}
 
 static int ati_spi_init(const struct programmer_cfg *cfg)
 {
@@ -91,6 +224,19 @@ static int ati_spi_init(const struct programmer_cfg *cfg)
 	data->dev = dev;
 	data->bar = bar;
 	data->private = private;
+
+	register_shutdown(ati_spi_shutdown, data);
+
+	int ret = private->save(data);
+	if (ret)
+		return ret;
+
+	ret = private->enable(data);
+	if (ret)
+		return ret;
+
+	if (register_spi_master(private->master, data))
+		return 1;
 
 	return 0;
 }
