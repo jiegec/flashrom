@@ -768,6 +768,16 @@ struct ati_spi_pci_match {
 };
 
 const struct ati_spi_pci_match ati_spi_pci_devices[] = {
+	{0x1002, 0x6640, &bonaire_spi_pci_private},
+	{0x1002, 0x6641, &bonaire_spi_pci_private},
+	{0x1002, 0x6646, &bonaire_spi_pci_private},
+	{0x1002, 0x6647, &bonaire_spi_pci_private},
+	{0x1002, 0x6649, &bonaire_spi_pci_private},
+	{0x1002, 0x6650, &bonaire_spi_pci_private},
+	{0x1002, 0x6651, &bonaire_spi_pci_private},
+	{0x1002, 0x6658, &bonaire_spi_pci_private},
+	{0x1002, 0x665C, &bonaire_spi_pci_private},
+	{0x1002, 0x665D, &bonaire_spi_pci_private},
 	{0x1002, 0x665F, &bonaire_spi_pci_private},
 	{0x1002, 0x6704, &northern_island_spi_pci_private},
 	{0x1002, 0x6707, &northern_island_spi_pci_private},
@@ -955,6 +965,16 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 };
 
 static const struct dev_entry devs_ati_spi[] = {
+	{0x1002, 0x6640, NT, "AMD", "Saturn XT [FirePro M6100]" },
+	{0x1002, 0x6641, NT, "AMD", "Saturn PRO [Radeon HD 8930M]" },
+	{0x1002, 0x6646, NT, "AMD", "Bonaire XT [Radeon R9 M280X / FirePro W6150M]" },
+	{0x1002, 0x6647, NT, "AMD", "Saturn PRO/XT [Radeon R9 M270X/M280X]" },
+	{0x1002, 0x6649, NT, "AMD", "Bonaire [FirePro W5100]" },
+	{0x1002, 0x6650, NT, "AMD", "Bonaire" },
+	{0x1002, 0x6651, NT, "AMD", "Bonaire" },
+	{0x1002, 0x6658, NT, "AMD", "Bonaire XTX [Radeon R7 260X/360]" },
+	{0x1002, 0x665C, NT, "AMD", "Bonaire XT [Radeon HD 7790/8770 / R7 360 / R9 260/360 OEM]" },
+	{0x1002, 0x665D, NT, "AMD", "Bonaire [Radeon R7 200 Series]" },
 	{0x1002, 0x665F, OK, "AMD", "Tobago PRO [Radeon R7 360 / R9 360 OEM]" },
 	{0x1002, 0x6704, NT, "AMD", "Cayman PRO GL [FirePro V7900]" },
 	{0x1002, 0x6707, NT, "AMD", "Cayman LE GL [FirePro V5900]" },
