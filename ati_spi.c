@@ -778,7 +778,8 @@ static const struct ati_spi_pci_private hawaii_spi_pci_private = {
 };
 
 /*
- * Used by Iceland, Tonga, Fiji, Ellesmere/Polaris10, Baffin/Polaris11
+ * Used by Iceland, Tonga, Fiji, Ellesmere/Polaris10, Baffin/Polaris11,
+ * Polaris12
  */
 static const struct ati_spi_pci_private iceland_spi_pci_private = {
 	.io_bar = CI_MMIO_BAR,
@@ -927,6 +928,13 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x692F, &iceland_spi_pci_private},
 	{0x1002, 0x6938, &iceland_spi_pci_private},
 	{0x1002, 0x6939, &iceland_spi_pci_private},
+	{0x1002, 0x6980, &iceland_spi_pci_private},
+	{0x1002, 0x6981, &iceland_spi_pci_private},
+	{0x1002, 0x6985, &iceland_spi_pci_private},
+	{0x1002, 0x6986, &iceland_spi_pci_private},
+	{0x1002, 0x6987, &iceland_spi_pci_private},
+	{0x1002, 0x6995, &iceland_spi_pci_private},
+	{0x1002, 0x699F, &iceland_spi_pci_private},
 	{0x1002, 0x7300, &iceland_spi_pci_private},
 	{0x1002, 0x9400, &r600_spi_pci_private},
 	{0x1002, 0x9401, &r600_spi_pci_private},
@@ -1161,6 +1169,13 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x692F, NT, "AMD", "Tonga XTV GL [FirePro S7150V]" },
 	{0x1002, 0x6938, NT, "AMD", "Tonga XT / Amethyst XT [Radeon R9 380X / R9 M295X]" },
 	{0x1002, 0x6939, NT, "AMD", "Tonga PRO [Radeon R9 285/380]" },
+	{0x1002, 0x6980, NT, "AMD", "Polaris12" },
+	{0x1002, 0x6981, NT, "AMD", "Lexa XT [Radeon PRO WX 3200]" },
+	{0x1002, 0x6985, NT, "AMD", "Lexa XT [Radeon PRO WX 3100]" },
+	{0x1002, 0x6986, NT, "AMD", "Polaris12" },
+	{0x1002, 0x6987, NT, "AMD", "Lexa [Radeon 540X/550X/630 / RX 640 / E9171 MCM]" },
+	{0x1002, 0x6995, NT, "AMD", "Lexa XT [Radeon PRO WX 2100]" },
+	{0x1002, 0x699F, NT, "AMD", "Lexa PRO [Radeon 540/540X/550/550X / RX 540X/550/550X]" },
 	{0x1002, 0x7300, NT, "AMD", "Fiji [Radeon R9 FURY / NANO Series]" },
 	{0x1002, 0x9400, NT, "AMD", "R600 [Radeon HD 2900 PRO/XT]" },
 	{0x1002, 0x9401, NT, "AMD", "R600 [Radeon HD 2900 XT]" },
