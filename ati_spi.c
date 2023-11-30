@@ -778,7 +778,7 @@ static const struct ati_spi_pci_private hawaii_spi_pci_private = {
 };
 
 /*
- * Used by Iceland
+ * Used by Iceland, Tonga
  */
 static const struct ati_spi_pci_private iceland_spi_pci_private = {
 	.io_bar = CI_MMIO_BAR,
@@ -904,6 +904,12 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x6900, &iceland_spi_pci_private},
 	{0x1002, 0x6901, &iceland_spi_pci_private},
 	{0x1002, 0x6907, &iceland_spi_pci_private},
+	{0x1002, 0x6921, &iceland_spi_pci_private},
+	{0x1002, 0x6929, &iceland_spi_pci_private},
+	{0x1002, 0x692B, &iceland_spi_pci_private},
+	{0x1002, 0x692F, &iceland_spi_pci_private},
+	{0x1002, 0x6938, &iceland_spi_pci_private},
+	{0x1002, 0x6939, &iceland_spi_pci_private},
 	{0x1002, 0x9400, &r600_spi_pci_private},
 	{0x1002, 0x9401, &r600_spi_pci_private},
 	{0x1002, 0x9402, &r600_spi_pci_private},
@@ -1114,6 +1120,12 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x6900, NT, "AMD", "Topaz XT [Radeon R7 M260/M265 / M340/M360 / M440/M445 / 530/535 / 620/625 Mobile]" },
 	{0x1002, 0x6901, NT, "AMD", "Topaz PRO [Radeon R5 M255]" },
 	{0x1002, 0x6907, NT, "AMD", "Meso XT [Radeon R5 M315]" },
+	{0x1002, 0x6921, NT, "AMD", "Amethyst XT [Radeon R9 M295X / M390X]" },
+	{0x1002, 0x6929, NT, "AMD", "Tonga XT GL [FirePro S7150]" },
+	{0x1002, 0x692B, NT, "AMD", "Tonga PRO GL [FirePro W7100]" },
+	{0x1002, 0x692F, NT, "AMD", "Tonga XTV GL [FirePro S7150V]" },
+	{0x1002, 0x6938, NT, "AMD", "Tonga XT / Amethyst XT [Radeon R9 380X / R9 M295X]" },
+	{0x1002, 0x6939, NT, "AMD", "Tonga PRO [Radeon R9 285/380]" },
 	{0x1002, 0x9400, NT, "AMD", "R600 [Radeon HD 2900 PRO/XT]" },
 	{0x1002, 0x9401, NT, "AMD", "R600 [Radeon HD 2900 XT]" },
 	{0x1002, 0x9402, NT, "AMD", "R600" },
