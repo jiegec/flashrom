@@ -73,6 +73,25 @@ static int ati_spi_init(const struct programmer_cfg *cfg)
 		return 1;
 	private = ati_spi_pci_devices[i].private;
 
+	uintptr_t io_base_addr = pcidev_readbar(dev, private->io_bar);
+	if (!io_base_addr)
+		return 1;
+
+	msg_pinfo("Detected ATI SPI I/O base address: 0x%"PRIxPTR".\n", io_base_addr);
+
+	bar = rphysmap("ATI SPI", io_base_addr, 0x4000);
+	if (bar == ERROR_PTR)
+		return 1;
+
+	struct ati_spi_data *data = calloc(1, sizeof(*data));
+	if (!data) {
+		msg_perr("Unable to allocate space for ati_spi_data\n");
+		return 1;
+	}
+	data->dev = dev;
+	data->bar = bar;
+	data->private = private;
+
 	return 0;
 }
 
