@@ -143,6 +143,7 @@ DEPENDS_ON_LIBPCI := \
 	CONFIG_ATAHPT \
 	CONFIG_ATAPROMISE \
 	CONFIG_ATAVIA \
+	CONFIG_ATI_SPI \
 	CONFIG_DRKAISER \
 	CONFIG_GFXNVIDIA \
 	CONFIG_INTERNAL \
@@ -528,6 +529,9 @@ CONFIG_JLINK_SPI ?= no
 # National Instruments USB-845x is Windows only and needs a proprietary library.
 CONFIG_NI845X_SPI ?= no
 
+# ATI Radeon SPI
+CONFIG_ATI_SPI ?= yes
+
 # Disable wiki printing by default. It is only useful if you have wiki access.
 CONFIG_PRINT_WIKI ?= no
 
@@ -836,6 +840,12 @@ ifeq ($(CONFIG_NI845X_SPI), yes)
 FEATURE_FLAGS += -D'CONFIG_NI845X_SPI=1'
 PROGRAMMER_OBJS += ni845x_spi.o
 ACTIVE_PROGRAMMERS += ni845x_spi
+endif
+
+ifeq ($(CONFIG_ATI_SPI), yes)
+FEATURE_CFLAGS += -D'CONFIG_ATI_SPI=1'
+PROGRAMMER_OBJS += ati_spi.o
+ACTIVE_PROGRAMMERS += ati_spi
 endif
 
 USE_BITBANG_SPI := $(if $(call filter_deps,$(DEPENDS_ON_BITBANG_SPI)),yes,no)

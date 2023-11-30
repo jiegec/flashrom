@@ -240,6 +240,13 @@ programmer = {
     'srcs'    : files('atavia.c', 'pcidev.c'),
     'flags'   : [ '-DCONFIG_ATAVIA=1' ],
   },
+  'ati_spi' : {
+    'systems' : systems_hwaccess,
+    'deps'    : [ libpci ],
+    'groups'  : [ group_pci, group_internal ],
+    'srcs'    : files('ati_spi.c', 'pcidev.c'),
+    'flags'   : [ '-DCONFIG_ATI_SPI=1' ],
+  },
   'buspirate_spi' : {
     'systems' : systems_serial,
     'groups'  : [ group_serial, group_external ],
