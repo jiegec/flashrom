@@ -779,7 +779,7 @@ static const struct ati_spi_pci_private hawaii_spi_pci_private = {
 
 /*
  * Used by Iceland, Tonga, Fiji, Ellesmere/Polaris10, Baffin/Polaris11,
- * Polaris12
+ * Polaris12, Polaris22.
  */
 static const struct ati_spi_pci_private iceland_spi_pci_private = {
 	.io_bar = CI_MMIO_BAR,
@@ -928,6 +928,8 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x692F, &iceland_spi_pci_private},
 	{0x1002, 0x6938, &iceland_spi_pci_private},
 	{0x1002, 0x6939, &iceland_spi_pci_private},
+	{0x1002, 0x694C, &iceland_spi_pci_private},
+	{0x1002, 0x694E, &iceland_spi_pci_private},
 	{0x1002, 0x6980, &iceland_spi_pci_private},
 	{0x1002, 0x6981, &iceland_spi_pci_private},
 	{0x1002, 0x6985, &iceland_spi_pci_private},
@@ -1169,6 +1171,8 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x692F, NT, "AMD", "Tonga XTV GL [FirePro S7150V]" },
 	{0x1002, 0x6938, NT, "AMD", "Tonga XT / Amethyst XT [Radeon R9 380X / R9 M295X]" },
 	{0x1002, 0x6939, NT, "AMD", "Tonga PRO [Radeon R9 285/380]" },
+	{0x1002, 0x694C, NT, "AMD", "Polaris 22 XT [Radeon RX Vega M GH]" },
+	{0x1002, 0x694E, NT, "AMD", "Polaris 22 XL [Radeon RX Vega M GL]" },
 	{0x1002, 0x6980, NT, "AMD", "Polaris12" },
 	{0x1002, 0x6981, NT, "AMD", "Lexa XT [Radeon PRO WX 3200]" },
 	{0x1002, 0x6985, NT, "AMD", "Lexa XT [Radeon PRO WX 3100]" },
