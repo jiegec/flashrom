@@ -45,6 +45,7 @@ enum ati_spi_type {
 	ATI_SPI_TYPE_SOUTHERN_ISLAND,
 	ATI_SPI_TYPE_BONAIRE, /* First of sea island type spi interface */
 	ATI_SPI_TYPE_HAWAII,
+	ATI_SPI_TYPE_ICELAND,
 };
 
 struct ati_spi_pci_private;
@@ -594,8 +595,10 @@ static int ci_spi_enable(struct ati_spi_data *device)
 		mmio_mask(CI_GPIOPAD_A, 0x40000000, 0x40000000);
 	}
 
-	/* disable open drain pads */
-	smc_mask(CI_GENERAL_PWRMGT, 0, 0x0800);
+	if ((private->type != ATI_SPI_TYPE_BONAIRE) &&
+	    (private->type != ATI_SPI_TYPE_HAWAII))
+		/* disable open drain pads */
+		smc_mask(CI_GENERAL_PWRMGT, 0, 0x0800);
 
 	default_delay(1000);
 
@@ -774,6 +777,18 @@ static const struct ati_spi_pci_private hawaii_spi_pci_private = {
 	.master = &ci_spi_master,
 };
 
+/*
+ * Used by Iceland
+ */
+static const struct ati_spi_pci_private iceland_spi_pci_private = {
+	.io_bar = CI_MMIO_BAR,
+	.type = ATI_SPI_TYPE_ICELAND,
+	.save = ci_spi_save,
+	.restore = ci_spi_restore,
+	.enable = ci_spi_enable,
+	.master = &ci_spi_master,
+};
+
 struct ati_spi_pci_match {
 	uint16_t vendor_id;
 	uint16_t device_id;
@@ -886,6 +901,9 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x68F9, &evergreen_spi_pci_private},
 	{0x1002, 0x68FA, &evergreen_spi_pci_private},
 	{0x1002, 0x68FE, &evergreen_spi_pci_private},
+	{0x1002, 0x6900, &iceland_spi_pci_private},
+	{0x1002, 0x6901, &iceland_spi_pci_private},
+	{0x1002, 0x6907, &iceland_spi_pci_private},
 	{0x1002, 0x9400, &r600_spi_pci_private},
 	{0x1002, 0x9401, &r600_spi_pci_private},
 	{0x1002, 0x9402, &r600_spi_pci_private},
@@ -1093,6 +1111,9 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x68F9, NT, "AMD", "Cedar [Radeon HD 5000/6000/7350/8350 Series]" },
 	{0x1002, 0x68FA, NT, "AMD", "Cedar [Radeon HD 7350/8350 / R5 220]" },
 	{0x1002, 0x68FE, NT, "AMD", "Cedar LE" },
+	{0x1002, 0x6900, NT, "AMD", "Topaz XT [Radeon R7 M260/M265 / M340/M360 / M440/M445 / 530/535 / 620/625 Mobile]" },
+	{0x1002, 0x6901, NT, "AMD", "Topaz PRO [Radeon R5 M255]" },
+	{0x1002, 0x6907, NT, "AMD", "Meso XT [Radeon R5 M315]" },
 	{0x1002, 0x9400, NT, "AMD", "R600 [Radeon HD 2900 PRO/XT]" },
 	{0x1002, 0x9401, NT, "AMD", "R600 [Radeon HD 2900 XT]" },
 	{0x1002, 0x9402, NT, "AMD", "R600" },
