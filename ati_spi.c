@@ -42,6 +42,7 @@ enum ati_spi_type {
 	ATI_SPI_TYPE_RV730,
 	ATI_SPI_TYPE_EVERGREEN,
 	ATI_SPI_TYPE_NORTHERN_ISLAND,
+	ATI_SPI_TYPE_SOUTHERN_ISLAND,
 };
 
 struct ati_spi_pci_private;
@@ -225,10 +226,15 @@ static int r600_spi_enable(struct ati_spi_data *device)
 	/* disable open drain pads */
 	mmio_mask(R600_GENERAL_PWRMGT, 0, 0x0800);
 
-	mmio_mask(R600_CTXSW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
-	mmio_mask(R600_HIGH_VID_LOWER_GPIO_CNTL, 0, 0x0400);
-	mmio_mask(R600_MEDIUM_VID_LOWER_GPIO_CNTL, 0, 0x0400);
-	mmio_mask(R600_LOW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+	if ((private->type == ATI_SPI_TYPE_R600) ||
+	    (private->type == ATI_SPI_TYPE_RV730) ||
+	    (private->type == ATI_SPI_TYPE_EVERGREEN) ||
+	    (private->type == ATI_SPI_TYPE_NORTHERN_ISLAND)) {
+		mmio_mask(R600_CTXSW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+		mmio_mask(R600_HIGH_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+		mmio_mask(R600_MEDIUM_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+		mmio_mask(R600_LOW_VID_LOWER_GPIO_CNTL, 0, 0x0400);
+	}
 
 	if ((private->type == ATI_SPI_TYPE_R600) ||
 	    (private->type == ATI_SPI_TYPE_RV730))
@@ -409,6 +415,19 @@ static const struct ati_spi_pci_private northern_island_spi_pci_private = {
 	.master = &r600_spi_master,
 };
 
+/*
+ * Used by Lombok.
+ * Verde, Pitcairn, Hainan and Oland are pending.
+ */
+static const struct ati_spi_pci_private southern_island_spi_pci_private = {
+	.io_bar = PCI_BASE_ADDRESS_2,
+	.type = ATI_SPI_TYPE_SOUTHERN_ISLAND,
+	.save = r600_spi_save,
+	.restore = r600_spi_restore,
+	.enable = r600_spi_enable,
+	.master = &r600_spi_master,
+};
+
 struct ati_spi_pci_match {
 	uint16_t vendor_id;
 	uint16_t device_id;
@@ -454,6 +473,10 @@ const struct ati_spi_pci_match ati_spi_pci_devices[] = {
 	{0x1002, 0x6778, &northern_island_spi_pci_private},
 	{0x1002, 0x6779, &northern_island_spi_pci_private},
 	{0x1002, 0x677B, &northern_island_spi_pci_private},
+	{0x1002, 0x6840, &southern_island_spi_pci_private},
+	{0x1002, 0x6841, &southern_island_spi_pci_private},
+	{0x1002, 0x6842, &southern_island_spi_pci_private},
+	{0x1002, 0x6843, &southern_island_spi_pci_private},
 	{0x1002, 0x6880, &evergreen_spi_pci_private},
 	{0x1002, 0x6888, &evergreen_spi_pci_private},
 	{0x1002, 0x6889, &evergreen_spi_pci_private},
@@ -636,6 +659,10 @@ static const struct dev_entry devs_ati_spi[] = {
 	{0x1002, 0x6778, NT, "AMD", "Caicos XT [Radeon HD 7470/8470 / R5 235/310 OEM]" },
 	{0x1002, 0x6779, NT, "AMD", "Caicos [Radeon HD 6450/7450/8450 / R5 230 OEM]" },
 	{0x1002, 0x677B, NT, "AMD", "Caicos PRO [Radeon HD 7450]" },
+	{0x1002, 0x6840, NT, "AMD", "Thames [Radeon HD 7500M/7600M Series]" },
+	{0x1002, 0x6841, NT, "AMD", "Thames [Radeon HD 7550M/7570M/7650M]" },
+	{0x1002, 0x6842, NT, "AMD", "Thames LE [Radeon HD 7000M Series]" },
+	{0x1002, 0x6843, NT, "AMD", "Thames [Radeon HD 7670M]" },
 	{0x1002, 0x6880, NT, "AMD", "Lexington [Radeon HD 6550M]" },
 	{0x1002, 0x6888, NT, "AMD", "Cypress XT [FirePro V8800]" },
 	{0x1002, 0x6889, NT, "AMD", "Cypress PRO [FirePro V7800]" },
